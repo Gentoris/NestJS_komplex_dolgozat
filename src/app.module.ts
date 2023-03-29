@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
 import { OwnerModule } from './owner/owner.module';
+import { Account } from './account/entities/account.entity';
+import { Owner } from './owner/entities/owner.entity';
 
 @Module({
   imports: [
@@ -14,9 +16,7 @@ import { OwnerModule } from './owner/owner.module';
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'database',
-      entities: [
-        /* List of entities here */
-      ],
+      entities: [Account, Owner],
       synchronize: true,
     }),
     AccountModule,

@@ -1,26 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { Account } from './entities/account.entity';
 
 @Injectable()
 export class AccountService {
-  create(createAccountDto: CreateAccountDto) {
-    return 'This action adds a new account';
+  constructor(private dataSource: DataSource) {}
+
+  async create(createAccountDto: CreateAccountDto) {
+    const accountRepo = await this.dataSource.getRepository(Account);
+    const account = new Account();
+    account.accountNumber = createAccountDto.accountNumber;
+    account.balance = createAccountDto.balance;
+    accountRepo.save(account);
   }
 
-  findAll() {
-    return `This action returns all account`;
+  async findAll() {
+    const AccountRepo = this.dataSource.getRepository(Account);
+    const account = AccountRepo.find();
+    return account;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} account`;
+  async findOne(id: number) {
+    const AccountRepo = this.dataSource.getRepository(Account);
+    const account = AccountRepo.find({ where: { id: id } });
+    return account;
   }
 
-  update(id: number, updateAccountDto: UpdateAccountDto) {
-    return `This action updates a #${id} account`;
+  async update(id: number, updateAccountDto: UpdateAccountDto) {
+    const accountRepo = this.dataSource.getRepository(Account);
+    if (!(await accountRepo.findOneBy({ id: id }))) {
+      throw new BadRequestException('Nincs ilyen fiók!');
+    }
+    const accountToUpdate = await accountRepo.findOneBy({ id });
+    if (updateAccountDto.accountNumber == null) {
+      throw new BadRequestException('Error');
+    }
+    accountToUpdate.accountNumber = updateAccountDto.accountNumber;
+    accountToUpdate.balance = updateAccountDto.balance;
+
+    accountRepo.save(accountToUpdate);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} account`;
+  async remove(id: number) {
+    const accountRepo = await this.dataSource.getRepository(Account);
+    accountRepo.delete(id);
   }
 }
